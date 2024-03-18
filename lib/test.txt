@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false, // Remove the debug check banner
+      title: 'logykinfotech',
+      home: WebViewPage(),
+    );
+  }
+}
+
+class WebViewPage extends StatefulWidget {
+  @override
+  _WebViewPageState createState() => _WebViewPageState();
+}
+
+class _WebViewPageState extends State<WebViewPage> {
+
+  bool isLoading = true;
+  late InAppWebViewController webViewController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Logyk infotech'),
+        backgroundColor: Color(0xFF0648b3),
+      ),
+      drawer: Drawer(),
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+                url: Uri.parse('https://logykinfotech.com/index.php')),
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+            },
+            onLoadStop: (controller, url) {
+              setState(() {
+                isLoading = false;
+              });
+            },
+          ),
+          Visibility(
+            visible: isLoading,
+            child: Center(
+              child: SpinKitFadingCircle(
+                color: Colors.blue,
+                size: 50.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'WebView Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final Completer<WebViewController> _controller =
+
+  Completer<WebViewController>();
+
+  late WebViewController _webViewController;
+  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Logky infotech"),
+      ),
+      body: Builder(builder: (BuildContext context) {
+        return WebView(
+          initialUrl: 'https://www.codemub.com',
+          javascriptMode: JavascriptMode.unrestricted,
+          onWebViewCreated: (WebViewController webViewController) {
+            _webViewController = webViewController;
+            _controller.complete(webViewController);
+          },
+
+
+          onPageFinished: (String url) {
+            print('Page finished loading: $url');
+
+            _webViewController
+                .evaluateJavascript("javascript:(function() { " +
+                "var head = document.getElementsByTagName('header')[0];" +
+                "head.parentNode.removeChild(head);" +
+                "var footer = document.getElementsByTagName('footer')[0];" +
+                "footer.parentNode.removeChild(footer);" +
+                "})()")
+                .then((value) =>
+                debugPrint('Page finished loading Javascript'))
+                .catchError((onError) => debugPrint('$onError'));
+          },
+          gestureNavigationEnabled: true,
+        );
+      }),
+    );
+
+  }
+}
